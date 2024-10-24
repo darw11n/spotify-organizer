@@ -1,72 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import SpotifyWebApi from 'spotify-web-api-js';
-
-const spotifyApi = new SpotifyWebApi();
+import { useEffect, useState } from "react";
+import { getSpotifyAuthUrl, getTokenFromUrl } from "./Auth";
+import LikedSongs from "./LikedSongs"; // Import the LikedSongs component
 
 function App() {
-  const [token, setToken] = useState('');
-  const [likedSongs, setLikedSongs] = useState([]);
-  const [playlists, setPlaylists] = useState([]);
-  const [currentSong, setCurrentSong] = useState(null);
+  const [accessToken, setAccessToken] = useState(null);
 
+  // Handle authentication and extract the access token from URL
   useEffect(() => {
-    const hash = window.location.hash;
-    let token = window.localStorage.getItem("token");
-
-    if (!token && hash) {
-      token = hash.substring(1).split("&").find(elem => elem.startsWith("access_token")).split("=")[1];
-      window.localStorage.setItem("token", token);
-      window.location.hash = "";
+    const token = getTokenFromUrl();
+    if (token) {
+      setAccessToken(token);
+      window.location.hash = ""; // Clear the URL hash
     }
-
-    setToken(token);
-
-    spotifyApi.setAccessToken(token);
-
-    // Fetch liked songs
-    spotifyApi.getMySavedTracks({ limit: 50 })
-      .then(response => {
-        setLikedSongs(response.items);
-      })
-      .catch(err => console.error(err));
-
-    // Fetch user playlists
-    spotifyApi.getUserPlaylists()
-      .then(response => {
-        setPlaylists(response.items);
-      })
-      .catch(err => console.error(err));
   }, []);
 
-  const handlePlaySong = (songId) => {
-    spotifyApi.play({ uris: [`spotify:track:${songId}`] })
-      .then(() => setCurrentSong(songId))
-      .catch(err => console.error('Error playing song:', err));
-  };
-
-  const handleAddToPlaylist = (playlistId, songId) => {
-    spotifyApi.addTracksToPlaylist(playlistId, [`spotify:track:${songId}`])
-      .then(() => console.log('Song added to playlist'))
-      .catch(err => console.error('Error adding song to playlist:', err));
+  // Redirect to Spotify for login
+  const handleLogin = () => {
+    window.location.href = getSpotifyAuthUrl();
   };
 
   return (
     <div>
-      <h1>Organize Your Liked Songs</h1>
-      {likedSongs.map((song) => (
-        <div key={song.track.id}>
-          <p>{song.track.name} by {song.track.artists[0].name}</p>
-          <button onClick={() => handlePlaySong(song.track.id)}>Play</button>
-          <select onChange={(e) => handleAddToPlaylist(e.target.value, song.track.id)}>
-            <option value="">Select Playlist</option>
-            {playlists.map((playlist) => (
-              <option value={playlist.id} key={playlist.id}>
-                {playlist.name}
-              </option>
-            ))}
-          </select>
+      <h1>Spotify Playlist Organizer</h1>
+      {!accessToken ? (
+        <button onClick={handleLogin}>Login with Spotify</button>
+      ) : (
+        <div>
+          <h2>You are logged in!</h2>
+          <LikedSongs accessToken={accessToken} /> {/* Add the LikedSongs component */}
         </div>
-      ))}
+      )}
     </div>
   );
 }
