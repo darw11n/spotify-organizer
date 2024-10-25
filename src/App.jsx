@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getSpotifyAuthUrl, getTokenFromUrl } from "./Auth";
-import LikedSongs from "./LikedSongs"; // Import the LikedSongs component
+//import {getLikedSongs} from "./LikedSongs"; // Import the LikedSongs component
 
 function App() {
   const [accessToken, setAccessToken] = useState(null);
@@ -14,7 +14,7 @@ function App() {
     }
   }, []);
 
-  // Redirect to Spotify for login
+  // Redirect to Spotify for login /*console.log<LikedSongs accessToken={accessToken} /> {/* Add the LikedSongs component */}*/
   const handleLogin = () => {
     window.location.href = getSpotifyAuthUrl();
   };
@@ -27,7 +27,7 @@ function App() {
       ) : (
         <div>
           <h2>You are logged in!</h2>
-          <LikedSongs accessToken={accessToken} /> {/* Add the LikedSongs component */}
+        
         </div>
       )}
     </div>
