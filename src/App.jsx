@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { getSpotifyAuthUrl, getTokenFromUrl } from "./Auth";
-//import {getLikedSongs} from "./LikedSongs"; // Import the LikedSongs component
+import { useNavigate } from "react-router-dom";
+
+//import {getLikedSongs} from "./LikedSongs"; 
 
 function App() {
   const [accessToken, setAccessToken] = useState(null);
-
+  let navigate = useNavigate();
+  // Somewhere in your code, e.g. inside a handler:
   // Handle authentication and extract the access token from URL
   useEffect(() => {
     const token = getTokenFromUrl();
@@ -27,7 +30,7 @@ function App() {
       ) : (
         <div>
           <h2>You are logged in!</h2>
-        
+          <button onClick = {navigate("/likedSongs")}> Go to your liked songs!</button>
         </div>
       )}
     </div>
